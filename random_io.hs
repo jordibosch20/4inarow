@@ -13,6 +13,6 @@ main :: IO ()
 -- main program that throws two dice.
 
 main = do
-    r1 <- randInt 1 4
-    r2 <- randInt 1 4
+    r1 <- randInt 0 2
+    r2 <- randInt 0 2
     print (r1, r2)

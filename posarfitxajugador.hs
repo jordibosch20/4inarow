@@ -38,8 +38,10 @@ splitEvery n list = first : (splitEvery n rest)
 
 substituir :: [[Int]] -> [Int] -> Int -> [[Int]]
 --tauler,columna nova, num columna, tauler
+substituir [] columna 0 = [columna]
 substituir (xs:x) columna 0 = [columna] ++ x
 substituir (xs:x) columna numero = [xs] ++ substituir x columna (numero - 1) 
+
 
 notFullrow :: Tauler -> Int -> Bool
 notFullrow (Tauler t1) row = 
@@ -362,8 +364,8 @@ jugar (Tauler t1) level
                     putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
-                    numero <- randInt 0 7
-                    jugar (posarfitxajugador taulernou Ordinador numero level
+                    numero <- randInt 0 6
+                    jugar (posarfitxajugador taulernou Ordinador numero) level
     | level == 2 =
         do
             print $ evaluarmatriu (t1) Participant 0 0
