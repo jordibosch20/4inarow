@@ -298,13 +298,23 @@ greedy x =
         snd(maximum([q | y <- [0..(length(greedy_1 x Ordinador 0)-1)], let q = ((greedy_1 x Ordinador 0)!!y,y)]))
 --no es res fer que fer una argmax
 
+transpose :: [[Int]] -> [[Int]]
+transpose ([]:_) = []
+transpose  x = (map last x) : transpose (map init x)
+
+escriutauler :: [[Int]] -> IO()
+escriutauler [] = do 
+    putStrLn("")
+escriutauler (xs:x) = do 
+    print(xs)
+    escriutauler x
 
 jugar :: Tauler -> IO ()
-jugar t1 = do
-    print(t1)
+jugar (Tauler t1) = do
+    escriutauler (transpose t1)
     putStrLn("Introdueix la columna on voldries posar la fitxa")
     num <- getLine
-    let taulernou = (posarfitxajugador t1 Participant (fromEnum (num!!0)-48))
+    let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
     jugar $ posarfitxajugador taulernou Ordinador (greedy taulernou) 
 
 main = do
