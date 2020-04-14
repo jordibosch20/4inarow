@@ -72,15 +72,15 @@ evaluarverticalamunt a Ordinador i j =
         0
 evaluarverticalamunt a Participant i j = 
     if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-            if (a!!i!!j == 2) then
-                1 + evaluarverticalamunt a Participant i (j+1)
-            else
-                if (a!!i!!j == 1) then
-                    -1000000
-                else
-                    0
+        if (a!!i!!j == 2) then
+            1 + evaluarverticalamunt a Participant i (j+1)
         else
-            0
+            if (a!!i!!j == 1) then
+                -1000000
+            else
+                0
+    else
+        0
 
 evaluarverticalavall :: [[Int]] -> Jugador -> Int -> Int -> Int
 evaluarverticalavall a Ordinador i j =
@@ -268,7 +268,7 @@ evaluarposicio a Participant i j =
     if (a!!i!!j == 2) then
         1 + maximum ([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
             + evaluar45esquerra a  Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  Participant (i+1)(j) + evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)]  ++ [evaluarverticalamunt a Ordinador i (j+1)]
+            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)]  ++ [evaluarverticalamunt a Participant i (j+1)]
             ++ [evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)] ++ [evaluar45esquerra a  Participant (i-1)(j-1)]
             ++ [evaluahortizontaldreta a  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a  Participant (i-1)(j)] ++
             [evaluar315dreta a  Participant (i+1)(j-1)] ++ [evaluar315esquerra a  Participant (i-1)(j+1)] ) 
@@ -332,34 +332,29 @@ escriutauler (xs:x) = do
     print(map caracters xs)
     escriutauler x
 
-jugar :: Tauler -> IO ()
-jugar (Tauler t1) = do
-    print $ evaluarmatriu (t1) Participant 0 0
-    if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
-        putStrLn("You won!")
-        escriutauler (transpose t1)
+jugar :: Tauler -> Int -> IO ()
+jugar (Tauler t1) level
+    | level == 2 =
+        do
+            print $ evaluarmatriu (t1) Participant 0 0
+            if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
+                putStrLn("You won!")
+                escriutauler (transpose t1)
 
-    else
-        if ((evaluarTauler (Tauler t1) Ordinador) >= 4) then do
-            putStrLn("The machine beat you!")
-            escriutauler (transpose t1)
-        else do
-            escriutauler (transpose t1)
-            putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
-            num <- getLine
-            let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
-            jugar $ posarfitxajugador taulernou Ordinador (greedy taulernou) 
+            else
+                if ((evaluarTauler (Tauler t1) Ordinador) >= 4) then do
+                    putStrLn("The machine beat you!")
+                    escriutauler (transpose t1)
+                else do
+                    escriutauler (transpose t1)
+                    putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
+                    num <- getLine
+                    let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
+                    jugar (posarfitxajugador taulernou Ordinador (greedy taulernou)) level
+    |otherwise = putStrLn("NO")
 
 main = do
-    --putStrLn("Introdueix les dimensions")
-{-    n <- getChar
-    espai <- getChar
-    m <- getChar
-
-    dimensions <- getLine
-    if (length(dimensions) >= 2) then do
-        let y = construirTauler ((fromEnum (dimensions!!0))-48) (fromEnum(dimensions!!2)-48)
-        print(y)
--}
+    putStrLn("Which level do you wanna face? 1-Easy, 2-Medium, 3-Hard")
+    level <- getLine
     putStrLn("Introdueix la columna on vols posar la fitxa! Tu Ets ''X''")
-    let y = construirTauler in jugar y
+    let y = construirTauler in jugar y (fromEnum (level!!0)-48)
