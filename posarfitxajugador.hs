@@ -258,14 +258,20 @@ evaluarposicio a Ordinador i j =
     if (a!!i!!j == 1) then
         1 + maximum ([evaluarverticalamunt a Ordinador i (j+1) + evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)
             + evaluar45esquerra a  Ordinador (i-1)(j-1)] ++ [evaluahortizontaldreta a  Ordinador (i+1)(j) + evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
-            [evaluar315dreta a  Ordinador (i+1)(j-1) + evaluar315esquerra a  Ordinador (i-1)(j+1)]) 
+            [evaluar315dreta a  Ordinador (i+1)(j-1) + evaluar315esquerra a  Ordinador (i-1)(j+1)] ++ [evaluarverticalamunt a Ordinador i (j+1)]
+            ++ [evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)] ++ [evaluar45esquerra a  Ordinador (i-1)(j-1)]
+            ++ [evaluahortizontaldreta a  Ordinador (i+1)(j)] ++ [ evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
+            [evaluar315dreta a  Ordinador (i+1)(j-1)] ++ [evaluar315esquerra a  Ordinador (i-1)(j+1)] ) 
     else
         0
 evaluarposicio a Participant i j = 
     if (a!!i!!j == 2) then
         1 + maximum ([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
             + evaluar45esquerra a  Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  Participant (i+1)(j) + evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)]) 
+            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)]  ++ [evaluarverticalamunt a Ordinador i (j+1)]
+            ++ [evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)] ++ [evaluar45esquerra a  Participant (i-1)(j-1)]
+            ++ [evaluahortizontaldreta a  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a  Participant (i-1)(j)] ++
+            [evaluar315dreta a  Participant (i+1)(j-1)] ++ [evaluar315esquerra a  Participant (i-1)(j+1)] ) 
     else
         0
 
@@ -312,20 +318,37 @@ transpose :: [[Int]] -> [[Int]]
 transpose ([]:_) = []
 transpose  x = (map last x) : transpose (map init x)
 
+caracters = \x -> 
+    if (x == 1) then 'X'
+    else
+        if (x == 2) then 'O'
+        else
+            '-'
+
 escriutauler :: [[Int]] -> IO()
 escriutauler [] = do 
     putStrLn("")
 escriutauler (xs:x) = do 
-    print(xs)
+    print(map caracters xs)
     escriutauler x
 
 jugar :: Tauler -> IO ()
 jugar (Tauler t1) = do
-    escriutauler (transpose t1)
-    putStrLn("Introdueix la columna on voldries posar la fitxa")
-    num <- getLine
-    let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
-    jugar $ posarfitxajugador taulernou Ordinador (greedy taulernou) 
+    print $ evaluarmatriu (t1) Participant 0 0
+    if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
+        putStrLn("You won!")
+        escriutauler (transpose t1)
+
+    else
+        if ((evaluarTauler (Tauler t1) Ordinador) >= 4) then do
+            putStrLn("The machine beat you!")
+            escriutauler (transpose t1)
+        else do
+            escriutauler (transpose t1)
+            putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
+            num <- getLine
+            let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
+            jugar $ posarfitxajugador taulernou Ordinador (greedy taulernou) 
 
 main = do
     --putStrLn("Introdueix les dimensions")
@@ -338,5 +361,5 @@ main = do
         let y = construirTauler ((fromEnum (dimensions!!0))-48) (fromEnum(dimensions!!2)-48)
         print(y)
 -}
-    putStrLn("Introdueix la columna on vols posar la fitxa")
+    putStrLn("Introdueix la columna on vols posar la fitxa! Tu Ets ''X''")
     let y = construirTauler in jugar y
