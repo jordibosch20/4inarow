@@ -29,6 +29,13 @@ substituir :: [[Int]] -> [Int] -> Int -> [[Int]]
 substituir (xs:x) columna 0 = [columna] ++ x
 substituir (xs:x) columna numero = [xs] ++ substituir x columna (numero - 1) 
 
+notFullrow :: Tauler -> Int -> Bool
+notFullrow (Tauler t1) row = 
+    if (t1!!row!!((length (t1!!row))-1) /= 0) then
+        False
+    else
+        True
+
 posarfitxajugador :: Tauler -> Jugador -> Int -> Tauler
 posarfitxajugador (Tauler a) (Ordinador) num = Tauler (substituir a (marcarPC (a!!num)) num)
     where 
@@ -285,8 +292,10 @@ greedy_1 (Tauler a) j1 i =
     if (i == length(a)) then
         []
     else
-        [evaluarTauler (posarfitxajugador (Tauler a) j1 i) j1] ++ (greedy_1 (Tauler a) j1 (i+1))
-
+        if (notFullrow (Tauler a) i) then
+            [evaluarTauler (posarfitxajugador (Tauler a) j1 i) j1] ++ (greedy_1 (Tauler a) j1 (i+1))
+        else
+            [-10000] ++ (greedy_1 (Tauler a) j1 (i+1))
 --Maybe greedy is the one that compares directly without having to receive the argument Jugador     
 --First we'll see if there's an option for the contester to score 4 next round.
 --If there's an option for the Participant to score 4 next round, we should aim for that row
@@ -298,6 +307,7 @@ greedy x =
         snd(maximum([q | y <- [0..(length(greedy_1 x Ordinador 0)-1)], let q = ((greedy_1 x Ordinador 0)!!y,y)]))
 --no es res fer que fer una argmax
 
+--It is not exactly the transpose I am looking for tbh, but the name works
 transpose :: [[Int]] -> [[Int]]
 transpose ([]:_) = []
 transpose  x = (map last x) : transpose (map init x)
