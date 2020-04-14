@@ -1,4 +1,6 @@
 import Control.Monad   
+import System.Random
+
 
 data Jugador = Ordinador | Participant
 
@@ -13,6 +15,16 @@ data Tauler = Tauler [[Int]]
 --construirTauler :: Int -> Int -> Tauler
 --n es el nombre de columnes
 --construirTauler n m = Tauler (splitEvery m (take (n*m) (iterate (+0) 0)))
+
+randInt :: Int -> Int -> IO Int
+-- randInt low high is an IO action that returns a
+-- pseudo-random integer between low and high (both included).
+randInt low high = do
+    random <- randomIO :: IO Int
+    let result = low + random `mod` (high - low + 1)
+    return result
+
+
 
 construirTauler :: Tauler
 --n es el nombre de columnes
@@ -334,6 +346,24 @@ escriutauler (xs:x) = do
 
 jugar :: Tauler -> Int -> IO ()
 jugar (Tauler t1) level
+    | level == 1 =
+        do
+            print $ evaluarmatriu (t1) Participant 0 0
+            if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
+                putStrLn("You won!")
+                escriutauler (transpose t1)
+
+            else
+                if ((evaluarTauler (Tauler t1) Ordinador) >= 4) then do
+                    putStrLn("The machine beat you!")
+                    escriutauler (transpose t1)
+                else do
+                    escriutauler (transpose t1)
+                    putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
+                    num <- getLine
+                    let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
+                    numero <- randInt 0 7
+                    jugar (posarfitxajugador taulernou Ordinador numero level
     | level == 2 =
         do
             print $ evaluarmatriu (t1) Participant 0 0
@@ -351,7 +381,7 @@ jugar (Tauler t1) level
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
                     jugar (posarfitxajugador taulernou Ordinador (greedy taulernou)) level
-    |otherwise = putStrLn("NO")
+    |otherwise = putStrLn("Undefined Level!")
 
 main = do
     putStrLn("Which level do you wanna face? 1-Easy, 2-Medium, 3-Hard")

@@ -7,12 +7,12 @@ randInt :: Int -> Int -> IO Int
 randInt low high = do
     random <- randomIO :: IO Int
     let result = low + random `mod` (high - low + 1)
-	    return result
+    return result
 
 main :: IO ()
 -- main program that throws two dice.
 
 main = do
-    r1 <- randInt 1 6
-    r2 <- randInt 1 6
+    r1 <- randInt 1 4
+    r2 <- randInt 1 4
     print (r1, r2)
