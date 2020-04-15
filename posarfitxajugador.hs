@@ -24,8 +24,6 @@ randInt low high = do
     let result = low + random `mod` (high - low + 1)
     return result
 
-
-
 construirTauler :: Tauler
 --n es el nombre de columnes
 construirTauler = Tauler (splitEvery 6 (take (42) (iterate (+0) 0)))
@@ -247,7 +245,7 @@ evaluar315esquerra :: [[Int]] -> Jugador -> Int -> Int -> Int
 evaluar315esquerra a Ordinador i j =
     if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
         if (a!!i!!j == 1) then
-            1 + evaluar315esquerra a Ordinador (i-1) (j-1)
+            1 + evaluar315esquerra a Ordinador (i-1) (j+1)
         else
             if (a!!i!!j == 2) then
                 -1000000
@@ -258,7 +256,7 @@ evaluar315esquerra a Ordinador i j =
 evaluar315esquerra a Participant i j =
     if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
         if (a!!i!!j == 2) then
-            1 + evaluar315esquerra a Participant (i-1) (j-1)
+            1 + evaluar315esquerra a Participant (i-1) (j+1)
         else
             if (a!!i!!j == 1) then
                 -1000000
@@ -266,6 +264,36 @@ evaluar315esquerra a Participant i j =
                 0
     else
         0
+
+
+
+
+
+prova :: [[Int]] -> Jugador -> Int -> Int -> [Int]
+prova a Ordinador i j = 
+    if (a!!i!!j == 1) then
+        ([evaluarverticalamunt a Ordinador i (j+1) + evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)
+            + evaluar45esquerra a  Ordinador (i-1)(j-1)] ++ [evaluahortizontaldreta a  Ordinador (i+1)(j) + evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
+            [evaluar315dreta a  Ordinador (i+1)(j-1) + evaluar315esquerra a  Ordinador (i-1)(j+1)] ++ [evaluarverticalamunt a Ordinador i (j+1)]
+            ++ [evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)] ++ [evaluar45esquerra a  Ordinador (i-1)(j-1)]
+            ++ [evaluahortizontaldreta a  Ordinador (i+1)(j)] ++ [ evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
+            [evaluar315dreta a  Ordinador (i+1)(j-1)] ++ [evaluar315esquerra a  Ordinador (i-1)(j+1)] ) 
+    else
+        [0]
+prova a Participant i j = 
+    if (a!!i!!j == 2) then
+        ([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
+            + evaluar45esquerra a  Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  Participant (i+1)(j) + evaluahortizontalesquerra a  Participant (i-1)(j)] ++
+            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)] ++ [evaluarverticalamunt a Participant i (j+1)]
+            ++ [evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)] ++ [evaluar45esquerra a  Participant (i-1)(j-1)]
+            ++ [evaluahortizontaldreta a  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a  Participant (i-1)(j)] ++
+            [evaluar315dreta a  Participant (i+1)(j-1)] ++ [evaluar315esquerra a  Participant (i-1)(j+1)] ) 
+    else
+        [0]
+
+
+
+
 
 evaluarposicio :: [[Int]] -> Jugador -> Int -> Int -> Int
 evaluarposicio a Ordinador i j = 
@@ -280,9 +308,9 @@ evaluarposicio a Ordinador i j =
         0
 evaluarposicio a Participant i j = 
     if (a!!i!!j == 2) then
-        1 + maximum ([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
+        1 + maximum([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
             + evaluar45esquerra a  Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  Participant (i+1)(j) + evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)]  ++ [evaluarverticalamunt a Participant i (j+1)]
+            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)] ++ [evaluarverticalamunt a Participant i (j+1)]
             ++ [evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)] ++ [evaluar45esquerra a  Participant (i-1)(j-1)]
             ++ [evaluahortizontaldreta a  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a  Participant (i-1)(j)] ++
             [evaluar315dreta a  Participant (i+1)(j-1)] ++ [evaluar315esquerra a  Participant (i-1)(j+1)] ) 
@@ -320,13 +348,20 @@ greedy_1 (Tauler a) j1 i =
 --First we'll see if there's an option for the contester to score 4 next round.
 --If there's an option for the Participant to score 4 next round, we should aim for that row
 greedy :: Tauler -> Int
-greedy x = 
-    if (fst(maximum([q | y <- [0..(length(greedy_1 x Participant 0) -1)], let q = ((greedy_1 x Participant 0)!!y,y)])) >= 4) then
-        snd(maximum([q | y <- [0..(length(greedy_1 x Participant 0) -1)], let q = ((greedy_1 x Participant 0)!!y,y)]))
+greedy (Tauler x) = 
+    if (fst(maximum([q | y <- [0..(length(x!!0) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)])) >= 4) then
+        snd(maximum([q | y <- [0..(length(x!!0) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]))
     else
-        snd(maximum([q | y <- [0..(length(greedy_1 x Ordinador 0)-1)], let q = ((greedy_1 x Ordinador 0)!!y,y)]))
+        snd(maximum([q | y <- [0..(length(x!!0)-1)], let q = ((greedy_1 (Tauler x) Ordinador 0)!!y,y)]))
 --no es res fer que fer una argmax
 
+minmaxarray :: Tauler -> [(Int,Int)]
+minmaxarray (Tauler x) = ([(maximum(greedy_1 z1 Participant 0),z) | z <- [0..(length(x)-1)], 
+    let z1 = posarfitxajugador (Tauler x) Ordinador z])
+
+minmax :: Tauler -> Int
+minmax (Tauler x) = snd(minimum[(maximum(greedy_1 z1 Participant 0),z) | z <- [0..(length(x)-1)], 
+    let z1 = posarfitxajugador (Tauler x) Ordinador z])
 --It is not exactly the transpose I am looking for tbh, but the name works
 transpose :: [[Int]] -> [[Int]]
 transpose ([]:_) = []
@@ -345,6 +380,9 @@ escriutauler [] = do
 escriutauler (xs:x) = do 
     print(map caracters xs)
     escriutauler x
+
+extreutauler :: Tauler -> [[Int]]
+extreutauler (Tauler t1) = t1
 
 jugar :: Tauler -> Int -> IO ()
 jugar (Tauler t1) level
@@ -383,6 +421,27 @@ jugar (Tauler t1) level
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
                     jugar (posarfitxajugador taulernou Ordinador (greedy taulernou)) level
+    | level == 3 =
+        do
+            print $ evaluarmatriu (t1) Participant 0 0
+            if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
+                putStrLn("You won!")
+                escriutauler (transpose t1)
+
+            else
+                if ((evaluarTauler (Tauler t1) Ordinador) >= 4) then do
+                    putStrLn("The machine beat you!")
+                    escriutauler (transpose t1)
+                else do
+                    escriutauler (transpose t1)
+                    putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
+                    num <- getLine
+                    let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
+                    let prova = (extreutauler taulernou)
+                    escriutauler $ transpose $ prova
+                    print (minmaxarray taulernou)
+                    jugar (posarfitxajugador taulernou Ordinador (minmax taulernou)) level
+
     |otherwise = putStrLn("Undefined Level!")
 
 main = do
