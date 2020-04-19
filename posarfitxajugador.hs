@@ -24,9 +24,9 @@ randInt low high = do
     let result = low + random `mod` (high - low + 1)
     return result
 
-construirTauler :: Tauler
+construirTauler :: Int -> Int -> Tauler
 --n es el nombre de columnes
-construirTauler = Tauler (splitEvery 6 (take (42) (iterate (+0) 0)))
+construirTauler n m = Tauler (splitEvery n (take (m*n) (iterate (+0) 0)))
 
 splitEvery :: Int -> [Int] -> [[Int]]
 splitEvery _ [] = []
@@ -70,227 +70,389 @@ posarfitxajugador (Tauler a) (Participant) num = Tauler(substituir (a) (marcarUS
                 [(xs+2)] ++ x
 --Greedy strategy computer
 --evitar que ell posi el 4 en ratlla, i fer on nhi haura mes dimmediat
-evaluarverticalamunt :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluarverticalamunt a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluarverticalamunt a Ordinador i (j+1)
-        else
-            if (a!!i!!j == 2) then
-                -1000000
-            else
-                0
-    else
-        0
-evaluarverticalamunt a Participant i j = 
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluarverticalamunt a Participant i (j+1)
-        else
+evaluarverticalamunt :: [[Int]] -> Bool -> Jugador -> Int -> Int -> Int
+evaluarverticalamunt a valor Ordinador i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 1) then
-                -1000000
+                1 + evaluarverticalamunt a valor Ordinador i (j+1)
             else
                 0
-    else
-        0
-
-evaluarverticalavall :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluarverticalavall a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluarverticalavall a Ordinador i (j-1)
-            --AIXO PETA PERQUE VA SALTANT AMUNT I AVALL
         else
-            if (a!!i!!j == 2) then
-                -1000000
-            else
-                0
+            0
     else
-        0
-evaluarverticalavall a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluarverticalavall a Participant i (j-1)
-            --AIXO PETA PERQUE VA SALTANT AMUNT I AVALL
-        else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 1) then
-                -1000000
+                1 + evaluarverticalamunt a valor Ordinador i (j+1)
             else
-                0
-    else
-        0
-
-evaluar45dreta :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluar45dreta a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluar45dreta a Ordinador (i+1) (j+1)
+                if (a!!i!!j == 2) then
+                    -1000000
+                else
+                    0   
         else
+            0
+evaluarverticalamunt a valor Participant i j =
+    if (valor) then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 2) then
-                -1000000
+                1 + evaluarverticalamunt a valor Participant i (j+1)
             else
-                0
-    else
-        0
-evaluar45dreta a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluar45dreta a Participant (i+1) (j+1)
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
         else
-            if (a!!i!!j == 1) then
-                -1000000
-            else
-                0
+            0
     else
-        0
-
-
-evaluar45esquerra :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluar45esquerra a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluar45esquerra a Ordinador (i-1) (j-1)
-        else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 2) then
-                -1000000
+                1 + evaluarverticalamunt a valor Participant i (j+1)
             else
-                0
-    else
-        0
-evaluar45esquerra a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluar45esquerra a Participant (i-1) (j-1)
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
         else
-            if (a!!i!!j == 1) then
-                -1000000
-            else
-                0
-    else
-        0
+            0
 
-evaluahortizontaldreta :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluahortizontaldreta a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluahortizontaldreta a Ordinador (i+1) (j)
+evaluarverticalavall :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+evaluarverticalavall a valor Ordinador i j =
+    if (valor) then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluarverticalavall a valor Ordinador i (j-1)
+                --AIXO PETA PERQUE VA SALTANT AMUNT I AVALL
+            else
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
         else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluarverticalavall a valor Ordinador i (j-1)
+                --AIXO PETA PERQUE VA SALTANT AMUNT I AVALL
+            else
+                if (a!!i!!j == 2) then
+                    -1000000
+                else
+                    0
+        else
+            0
+evaluarverticalavall a valor Participant i j =
+    if (valor) then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 2) then
-                -1000000
+                1 + evaluarverticalavall a valor Participant i (j-1)
+                --AIXO PETA PERQUE VA SALTANT AMUNT I AVALL
             else
-                0
-    else
-        0
-evaluahortizontaldreta a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluahortizontaldreta a Participant (i+1) (j)
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
         else
-            if (a!!i!!j == 1) then
-                -1000000
-            else
-                0
+            0
     else
-        0
-
-evaluahortizontalesquerra :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluahortizontalesquerra a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluahortizontalesquerra a Ordinador (i-1) (j)
-        else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 2) then
-                -1000000
+                1 + evaluarverticalavall a valor Participant i (j-1)
+                --AIXO PETA PERQUE VA SALTANT AMUNT I AVALL
             else
-                0
-    else
-        0
-evaluahortizontalesquerra a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluahortizontalesquerra a Participant (i-1) (j)
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
         else
-            if (a!!i!!j == 1) then
-                -1000000
-            else
-                0
-    else
-        0
+            0
 
-evaluar315dreta :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluar315dreta a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluar315dreta a Ordinador (i+1) (j-1)
+evaluar45dreta :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+evaluar45dreta a valor Ordinador i j =
+    if (valor) then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluar45dreta a  valor Ordinador (i+1) (j+1)
+            else
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
         else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluar45dreta a  valor Ordinador (i+1) (j+1)
+            else
+                if (a!!i!!j == 2) then
+                    -1000000
+                else
+                    0
+        else
+            0
+evaluar45dreta a valor Participant i j =
+    if (valor) then 
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 2) then
-                -1000000
+                1 + evaluar45dreta a  valor Participant (i+1) (j+1)
             else
-                0
-    else
-        0
-evaluar315dreta a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluar315dreta a Participant (i+1) (j-1)
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
         else
-            if (a!!i!!j == 1) then
-                -1000000
-            else
-                0
+            0
     else
-        0
-
-evaluar315esquerra :: [[Int]] -> Jugador -> Int -> Int -> Int
-evaluar315esquerra a Ordinador i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 1) then
-            1 + evaluar315esquerra a Ordinador (i-1) (j+1)
-        else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 2) then
-                -1000000
+                1 + evaluar45dreta a valor Participant (i+1) (j+1)
             else
-                0
-    else
-        0
-evaluar315esquerra a Participant i j =
-    if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
-        if (a!!i!!j == 2) then
-            1 + evaluar315esquerra a Participant (i-1) (j+1)
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
         else
+            0
+
+evaluar45esquerra :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+evaluar45esquerra a valor Ordinador i j =
+    if (valor) then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
             if (a!!i!!j == 1) then
-                -1000000
+                1 + evaluar45esquerra a valor Ordinador (i-1) (j-1)
             else
-                0
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluar45esquerra a valor Ordinador (i-1) (j-1)
+            else
+                if (a!!i!!j == 2) then
+                    -1000000
+                else
+                    0
     else
         0
-
-
-
-
-
-prova :: [[Int]] -> Jugador -> Int -> Int -> [Int]
-prova a Ordinador i j = 
-    if (a!!i!!j == 1) then
-        ([evaluarverticalamunt a Ordinador i (j+1) + evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)
-            + evaluar45esquerra a  Ordinador (i-1)(j-1)] ++ [evaluahortizontaldreta a  Ordinador (i+1)(j) + evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
-            [evaluar315dreta a  Ordinador (i+1)(j-1) + evaluar315esquerra a  Ordinador (i-1)(j+1)] ++ [evaluarverticalamunt a Ordinador i (j+1)]
-            ++ [evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)] ++ [evaluar45esquerra a  Ordinador (i-1)(j-1)]
-            ++ [evaluahortizontaldreta a  Ordinador (i+1)(j)] ++ [ evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
-            [evaluar315dreta a  Ordinador (i+1)(j-1)] ++ [evaluar315esquerra a  Ordinador (i-1)(j+1)] ) 
+evaluar45esquerra a valor Participant i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar45esquerra a valor Participant (i-1) (j-1)
+            else
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
+        else
+            0
     else
-        [0]
-prova a Participant i j = 
-    if (a!!i!!j == 2) then
-        ([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
-            + evaluar45esquerra a  Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  Participant (i+1)(j) + evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)] ++ [evaluarverticalamunt a Participant i (j+1)]
-            ++ [evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)] ++ [evaluar45esquerra a  Participant (i-1)(j-1)]
-            ++ [evaluahortizontaldreta a  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1)] ++ [evaluar315esquerra a  Participant (i-1)(j+1)] ) 
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar45esquerra a valor Participant (i-1) (j-1)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
     else
-        [0]
+        0
+evaluahortizontaldreta :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+evaluahortizontaldreta a valor Ordinador i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluahortizontaldreta a valor Ordinador (i+1) (j)
+            else
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluahortizontaldreta a valor Ordinador (i+1) (j)
+            else
+                if (a!!i!!j == 2) then
+                    -1000000
+                else
+                    0
+        else
+            0
+evaluahortizontaldreta a valor Participant i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluahortizontaldreta a valor Participant (i+1) (j)
+            else
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluahortizontaldreta a valor Participant (i+1) (j)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+        else
+            0
+evaluahortizontalesquerra :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+evaluahortizontalesquerra a valor Ordinador i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluahortizontalesquerra a valor Ordinador (i-1) (j)
+            else
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluahortizontaldreta a valor Participant (i+1) (j)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+        else
+            0
+evaluahortizontalesquerra a valor Participant i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluahortizontalesquerra a valor Participant (i-1) (j)
+            else
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluahortizontalesquerra a valor Participant (i-1) (j)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+        else
+            0
 
+evaluar315dreta :: [[Int]] -> Bool -> Jugador -> Int -> Int -> Int
+evaluar315dreta a valor Ordinador i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluar315dreta a valor Ordinador (i+1) (j-1)
+            else
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluar315dreta a valor Ordinador (i+1) (j-1)
+            else
+                if (a!!i!!j == 2) then
+                    -1000000
+                else
+                    0
+    else
+        0
+evaluar315dreta a valor Participant i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar315dreta a valor Participant (i+1) (j-1)
+            else
+                if (a!!i!!j == 1) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar315dreta a valor Participant (i+1) (j-1)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+        else
+            0
+
+
+evaluar315esquerra :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+evaluar315esquerra a valor Ordinador i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 1) then
+                1 + evaluar315esquerra a valor Ordinador (i-1) (j+1)
+            else
+                if (a!!i!!j == 2) then
+                    0
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar315dreta a valor Participant (i+1) (j-1)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+        else
+            0
+evaluar315esquerra a valor Participant i j =
+    if valor then
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar315esquerra a valor Participant (i-1) (j+1)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+        else
+            0
+    else
+        if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
+            if (a!!i!!j == 2) then
+                1 + evaluar315dreta a valor Participant (i+1) (j-1)
+            else
+                if (a!!i!!j == 1) then
+                    -1000000
+                else
+                    0
+    else
+        0
 
 
 
@@ -298,22 +460,38 @@ prova a Participant i j =
 evaluarposicio :: [[Int]] -> Jugador -> Int -> Int -> Int
 evaluarposicio a Ordinador i j = 
     if (a!!i!!j == 1) then
-        1 + maximum ([evaluarverticalamunt a Ordinador i (j+1) + evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)
-            + evaluar45esquerra a  Ordinador (i-1)(j-1)] ++ [evaluahortizontaldreta a  Ordinador (i+1)(j) + evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
-            [evaluar315dreta a  Ordinador (i+1)(j-1) + evaluar315esquerra a  Ordinador (i-1)(j+1)] ++ [evaluarverticalamunt a Ordinador i (j+1)]
-            ++ [evaluarverticalavall a Ordinador i (j-1)] ++ [evaluar45dreta a  Ordinador (i+1)(j+1)] ++ [evaluar45esquerra a  Ordinador (i-1)(j-1)]
-            ++ [evaluahortizontaldreta a  Ordinador (i+1)(j)] ++ [ evaluahortizontalesquerra a  Ordinador (i-1)(j)] ++
-            [evaluar315dreta a  Ordinador (i+1)(j-1)] ++ [evaluar315esquerra a  Ordinador (i-1)(j+1)] ) 
+        if ( 1 + maximum ([evaluarverticalamunt a True Ordinador i (j+1) + evaluarverticalavall a True Ordinador i (j-1)] ++ [evaluar45dreta a True  Ordinador (i+1)(j+1)
+            + evaluar45esquerra a True  Ordinador (i-1)(j-1)] ++ [evaluahortizontaldreta a True  Ordinador (i+1)(j) + evaluahortizontalesquerra a True  Ordinador (i-1)(j)] ++
+            [evaluar315dreta a True  Ordinador (i+1)(j-1) + evaluar315esquerra a True  Ordinador (i-1)(j+1)] ++ [evaluarverticalamunt a True Ordinador i (j+1)]
+            ++ [evaluarverticalavall a True Ordinador i (j-1)] ++ [evaluar45dreta a True  Ordinador (i+1)(j+1)] ++ [evaluar45esquerra a True  Ordinador (i-1)(j-1)]
+            ++ [evaluahortizontaldreta a True  Ordinador (i+1)(j)] ++ [ evaluahortizontalesquerra a  True Ordinador (i-1)(j)] ++
+            [evaluar315dreta a  True Ordinador (i+1)(j-1)] ++ [evaluar315esquerra a  True Ordinador (i-1)(j+1)] ) >= 4 ) then
+            4
+        else
+            1 + maximum ([evaluarverticalamunt a False Ordinador i (j+1) + evaluarverticalavall a False Ordinador i (j-1)] ++ [evaluar45dreta a False  Ordinador (i+1)(j+1)
+                + evaluar45esquerra a False  Ordinador (i-1)(j-1)] ++ [evaluahortizontaldreta a  False Ordinador (i+1)(j) + evaluahortizontalesquerra a False  Ordinador (i-1)(j)] ++
+                [evaluar315dreta a  False Ordinador (i+1)(j-1) + evaluar315esquerra a  False Ordinador (i-1)(j+1)] ++ [evaluarverticalamunt a  False Ordinador i (j+1)]
+                ++ [evaluarverticalavall a False Ordinador i (j-1)] ++ [evaluar45dreta a False Ordinador (i+1)(j+1)] ++ [evaluar45esquerra a  False  Ordinador (i-1)(j-1)]
+                ++ [evaluahortizontaldreta a False  Ordinador (i+1)(j)] ++ [ evaluahortizontalesquerra a  False Ordinador (i-1)(j)] ++
+                [evaluar315dreta a  False Ordinador (i+1)(j-1)] ++ [evaluar315esquerra a  False Ordinador (i-1)(j+1)] ) 
     else
         0
 evaluarposicio a Participant i j = 
     if (a!!i!!j == 2) then
-        1 + maximum([evaluarverticalamunt a Participant i (j+1) + evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)
-            + evaluar45esquerra a  Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  Participant (i+1)(j) + evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1) + evaluar315esquerra a  Participant (i-1)(j+1)] ++ [evaluarverticalamunt a Participant i (j+1)]
-            ++ [evaluarverticalavall a Participant i (j-1)] ++ [evaluar45dreta a  Participant (i+1)(j+1)] ++ [evaluar45esquerra a  Participant (i-1)(j-1)]
-            ++ [evaluahortizontaldreta a  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a  Participant (i-1)(j)] ++
-            [evaluar315dreta a  Participant (i+1)(j-1)] ++ [evaluar315esquerra a  Participant (i-1)(j+1)] ) 
+        if (1 + maximum([evaluarverticalamunt a True Participant i (j+1) + evaluarverticalavall a True Participant i (j-1)] ++ [evaluar45dreta a True  Participant (i+1)(j+1)
+                + evaluar45esquerra a  True Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a True  Participant (i+1)(j) + evaluahortizontalesquerra a  True Participant (i-1)(j)] ++
+                [evaluar315dreta a  True Participant (i+1)(j-1) + evaluar315esquerra a  True Participant (i-1)(j+1)] ++ [evaluarverticalamunt a True Participant i (j+1)]
+                ++ [evaluarverticalavall a True Participant i (j-1)] ++ [evaluar45dreta a True  Participant (i+1)(j+1)] ++ [evaluar45esquerra a True  Participant (i-1)(j-1)]
+                ++ [evaluahortizontaldreta a True  Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a True  Participant (i-1)(j)] ++
+                [evaluar315dreta a True  Participant (i+1)(j-1)] ++ [evaluar315esquerra a True  Participant (i-1)(j+1)] ) >= 4) then
+            4
+        else    
+            1 + maximum([evaluarverticalamunt a False Participant i (j+1) + evaluarverticalavall a False Participant i (j-1)] ++ [evaluar45dreta a False  Participant (i+1)(j+1)
+                + evaluar45esquerra a  False Participant (i-1)(j-1)] ++ [evaluahortizontaldreta a  False Participant (i+1)(j) + evaluahortizontalesquerra a  False Participant (i-1)(j)] ++
+                [evaluar315dreta a False  Participant (i+1)(j-1) + evaluar315esquerra a  False Participant (i-1)(j+1)] ++ [evaluarverticalamunt a False Participant i (j+1)]
+                ++ [evaluarverticalavall a False Participant i (j-1)] ++ [evaluar45dreta a  False Participant (i+1)(j+1)] ++ [evaluar45esquerra a False  Participant (i-1)(j-1)]
+                ++ [evaluahortizontaldreta a  False Participant (i+1)(j)] ++ [ evaluahortizontalesquerra a False  Participant (i-1)(j)] ++
+                [evaluar315dreta a  False Participant (i+1)(j-1)] ++ [evaluar315esquerra a False  Participant (i-1)(j+1)] ) 
     else
         0
 
@@ -327,7 +505,10 @@ evaluarmatriu a j1 i j =
             [evaluarposicio a j1 i j] ++ evaluarmatriu a j1 (i+1) (0)
             else
             [evaluarposicio a j1 i j] ++ evaluarmatriu a j1 i (j+1)
-        
+
+evaluarTaulerprova :: Tauler -> Jugador -> [Int]
+evaluarTaulerprova (Tauler a) j1  =  evaluarmatriu a j1 0 0
+
 
 evaluarTauler :: Tauler -> Jugador -> Int
 --ens ha de retornar per cada tauler quantes consequtives del jugador Ordinador hi ha
@@ -349,19 +530,28 @@ greedy_1 (Tauler a) j1 i =
 --If there's an option for the Participant to score 4 next round, we should aim for that row
 greedy :: Tauler -> Int
 greedy (Tauler x) = 
-    if (fst(maximum([q | y <- [0..(length(x!!0) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)])) >= 4) then
-        snd(maximum([q | y <- [0..(length(x!!0) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]))
+    if (fst(maximum([q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)])) >= 4) then
+        snd(maximum([q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]))
     else
-        snd(maximum([q | y <- [0..(length(x!!0)-1)], let q = ((greedy_1 (Tauler x) Ordinador 0)!!y,y)]))
+        snd(maximum([q | y <- [0..(length(x)-1)], let q = ((greedy_1 (Tauler x) Ordinador 0)!!y,y)]))
 --no es res fer que fer una argmax
 
-minmaxarray :: Tauler -> [(Int,Int)]
-minmaxarray (Tauler x) = ([(maximum(greedy_1 z1 Participant 0),z) | z <- [0..(length(x)-1)], 
-    let z1 = posarfitxajugador (Tauler x) Ordinador z])
+--minmaxarray :: Tauler -> [(Int,Int)]
+--minmaxarray (Tauler x) = [(evaluarTauler z3,z) | z <- [0..(length(x)-1)]]
+
+mapcalcularmaxim :: [Tauler] -> [Int]
+mapcalcularmaxim [] = []
+mapcalcularmaxim (xs:x) = [evaluarTauler xs Participant] ++ mapcalcularmaxim x
 
 minmax :: Tauler -> Int
-minmax (Tauler x) = snd(minimum[(maximum(greedy_1 z1 Participant 0),z) | z <- [0..(length(x)-1)], 
-    let z1 = posarfitxajugador (Tauler x) Ordinador z])
+minmax (Tauler x) = 
+    snd(minimum[(maximum(mapcalcularmaxim (computar (Tauler x) l1)),l1) | l1 <- [0..(length(x)-1)]]) 
+    where
+        computar :: Tauler -> Int -> [Tauler]
+        --la funcio computar iterara amb la primera component fixada
+        computar (Tauler x) i = [z3 | l2 <- [0..(length(x)-1)], l3 <- [0..(length(x)-1)], let z3 = posarfitxajugador (posarfitxajugador ((posarfitxajugador (Tauler x) Ordinador i)) Participant l2) Participant l3]
+
+
 --It is not exactly the transpose I am looking for tbh, but the name works
 transpose :: [[Int]] -> [[Int]]
 transpose ([]:_) = []
@@ -402,7 +592,7 @@ jugar (Tauler t1) level
                     putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
-                    numero <- randInt 0 6
+                    numero <- randInt 0 (length(t1)-1)
                     jugar (posarfitxajugador taulernou Ordinador numero) level
     | level == 2 =
         do
@@ -423,6 +613,7 @@ jugar (Tauler t1) level
                     jugar (posarfitxajugador taulernou Ordinador (greedy taulernou)) level
     | level == 3 =
         do
+            print (evaluarTaulerprova (Tauler t1) Participant)
             print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
                 putStrLn("You won!")
@@ -437,15 +628,19 @@ jugar (Tauler t1) level
                     putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
-                    let prova = (extreutauler taulernou)
-                    escriutauler $ transpose $ prova
-                    print (minmaxarray taulernou)
+                    let provarr = (extreutauler taulernou)
+                    escriutauler $ transpose $ provarr
+                    --print (minmaxarray taulernou)
                     jugar (posarfitxajugador taulernou Ordinador (minmax taulernou)) level
 
     |otherwise = putStrLn("Undefined Level!")
 
 main = do
+    putStrLn("Enter the number of rows")
+    n <- getLine
+    putStrLn("Enter the number of columns")
+    m <- getLine
     putStrLn("Which level do you wanna face? 1-Easy, 2-Medium, 3-Hard")
     level <- getLine
-    putStrLn("Introdueix la columna on vols posar la fitxa! Tu Ets ''X''")
-    let y = construirTauler in jugar y (fromEnum (level!!0)-48)
+    putStrLn("Introdueix la columna on vols posar la fitxa (comencant pel 0). Tu Ets el simbol''X''")
+    let y = construirTauler (fromEnum (n!!0)-48) (fromEnum (m!!0)-48) in jugar y (fromEnum (level!!0)-48)
