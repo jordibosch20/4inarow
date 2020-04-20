@@ -1,48 +1,45 @@
-# Project Title
+# 4 en Ratlla
 
-One Paragraph of project description goes here
+En aquesta pràctica de LP, realitzarem un programa amb Haskell que jugui interactivament contra el 
+participant al 4 en ratlla
 
-## Getting Started
+## Anar començant
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Les seguents instruccions et diran com executar el programa.
 
-### Prerequisites
+### Prerequisits
 
-What things you need to install the software and how to install them
+Només necessites el compilador ghc per compilar codi Haskell. També necessites la llibreria System.Random
 
+En cas que no tingueu instalat el ghc:
+
+```bash
+> sudo apt install ghc
 ```
-Give examples
-```
+I per instal·lar la llibreria Random
 
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
+```bash
+> sudo apt install cabal-install
+> cabal update
+> cabal install random
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+### Compilar
 
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+Per compilar només cal fer a la línia de comandes
 
 ```
-Give an example
+ghc joc.hs
 ```
+
+```
+./joc
+```
+
+## Com jugar
+
+A partir d'ara, seleccionem el nombre de files i columnes que volem i després el nivell contra el que volem jugar
+
 
 ### And coding style tests
 
@@ -52,9 +49,30 @@ Explain what these tests test and why
 Give an example
 ```
 
-## Deployment
+## Desenvolupament
 
-Add additional notes about how to deploy this on a live system
+Aquí mostraré alguns insights d'algunes funcions clau per entendre el funcionament.
+
+El nivell 1, l'ordinador simplement selecciona una columna de manera Random.
+
+El nivell 2, l'ordinador segueix una estratègia greedy. Això significa que sempre busca maximitzar el número
+de fitxes consequtives que podria colocar i decideix la columna en base a aquest raonament.
+
+Ens assegurem però, de que si el Participant pot fer-ne 4 seguides en el pròxim torn, intentem evitar-ho, sense
+tenir en compte maximitzar les nostres fitxes.
+
+Aquesta estrategia presenta certes mancances ja que no es capaç de preveure moviments pròxims del contrari que
+el portaran a perdre, ja que molts cops actuar "greedilment" ens porta a mínims locals i no globals. Un clar
+exemple es que la simple sequencia del Participant 3-4-2 guanya.
+
+En el nivell 3, el que fem es és intentar anar més profundament en les possibles combinacions que el participant
+pot fer i actuar en conseqüència. En el meu cas he decidit seguir una estratègia min-max. Això significa que
+per decidir la columna on posaré la fitxa el que faig és simular que passaria en 2 nivells de profunditat si 
+poses la fitxa en cada columna. És a dir, simulo que l'Ordinador posa la fitxa a cada columna, a partir d'aquí
+miro cada possibilitat que pot posar el Participant, en aquest nou Tauler miro on posaria la fitxa l'Ordinador
+(actuant greedilment) i a partir d'aquí miro totes les possibilitats que pot fer el Participant.
+Llavors el que faig és escollir la columna que em dongui el mínim màxim, és a dir
+
 
 ## Built With
 
