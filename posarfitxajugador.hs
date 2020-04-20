@@ -1,7 +1,6 @@
 import Control.Monad   
 import System.Random
 
-
 data Jugador = Ordinador | Participant
 
 data Tauler_Invertit = Tauler_Invertit [[Int]]
@@ -10,11 +9,7 @@ data Tauler_Invertit = Tauler_Invertit [[Int]]
 
 data Tauler = Tauler [[Int]]
     deriving (Show)
---n = files, m = columnes
-
---construirTauler :: Int -> Int -> Tauler
---n es el nombre de columnes
---construirTauler n m = Tauler (splitEvery m (take (n*m) (iterate (+0) 0)))
+--Tauler no es res mes que una llista d'Ints. Representarem els dos jugadors amb 0 i 1.
 
 randInt :: Int -> Int -> IO Int
 -- randInt low high is an IO action that returns a
@@ -25,23 +20,25 @@ randInt low high = do
     return result
 
 construirTauler :: Int -> Int -> Tauler
---n es el nombre de columnes
+--n es el nombre de columnes. Donats dos enters ens contrueix un Tauler
 construirTauler n m = Tauler (splitEvery n (take (m*n) (iterate (+0) 0)))
 
 splitEvery :: Int -> [Int] -> [[Int]]
+--Funcio auxiliar per crear el tauler
 splitEvery _ [] = []
 splitEvery n list = first : (splitEvery n rest)
   where
     (first,rest) = splitAt n list
 
 substituir :: [[Int]] -> [Int] -> Int -> [[Int]]
---tauler,columna nova, num columna, tauler
+--Donat la matriu que representa a tauler, una columna nova, i un numero, retorna tauler amb la nova columna a la posicio indicada
 substituir [] columna 0 = [columna]
 substituir (xs:x) columna 0 = [columna] ++ x
 substituir (xs:x) columna numero = [xs] ++ substituir x columna (numero - 1) 
 
 
 notFullrow :: Tauler -> Int -> Bool
+--Funcio que ens indica si donat un tauler i el numero d'una columna, aquesta esta plena de "fitxes" o encara no
 notFullrow (Tauler t1) row = 
     if (t1!!row!!((length (t1!!row))-1) /= 0) then
         False
@@ -49,6 +46,7 @@ notFullrow (Tauler t1) row =
         True
 
 posarfitxajugador :: Tauler -> Jugador -> Int -> Tauler
+--Funcio que donat un Tauler, un Jugador i numero on vol posar la fitxa, et retorna el nou tauler
 posarfitxajugador (Tauler a) (Ordinador) num = Tauler (substituir a (marcarPC (a!!num)) num)
     where 
         marcarPC :: [Int] -> [Int]
@@ -68,9 +66,11 @@ posarfitxajugador (Tauler a) (Participant) num = Tauler(substituir (a) (marcarUS
                 [xs] ++ marcarUSER x
             else
                 [(xs+2)] ++ x
---Greedy strategy computer
---evitar que ell posi el 4 en ratlla, i fer on nhi haura mes dimmediat
+
+
 evaluarverticalamunt :: [[Int]] -> Bool -> Jugador -> Int -> Int -> Int
+--Funcio que donat el Tauler, un Jugador i una posicio (dos enters), ens diu quantes fitxes del jugador hi ha 
+--"en ratlla" mirant cap amunt. La necessitat de la variable Bool l'explicare en detall en el read.me
 evaluarverticalamunt a valor Ordinador i j =
     if valor then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -545,11 +545,16 @@ mapcalcularmaxim (xs:x) = [evaluarTauler xs Participant] ++ mapcalcularmaxim x
 
 minmax :: Tauler -> Int
 minmax (Tauler x) = 
-    snd(minimum[(maximum(mapcalcularmaxim (computar (Tauler x) l1)),l1) | l1 <- [0..(length(x)-1)]]) 
-    where
-        computar :: Tauler -> Int -> [Tauler]
-        --la funcio computar iterara amb la primera component fixada
-        computar (Tauler x) i = [z3 | l2 <- [0..(length(x)-1)], l3 <- [0..(length(x)-1)], let z3 = posarfitxajugador (posarfitxajugador ((posarfitxajugador (Tauler x) Ordinador i)) Participant l2) Participant l3]
+    if (fst(maximum[q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]) == 4) then
+        snd(maximum([q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]))
+    else
+        snd(minimum[(maximum(mapcalcularmaxim (computar (Tauler x) l1)),l1) | l1 <- [0..(length(x)-1)]]) 
+        where
+            computar :: Tauler -> Int -> [Tauler]
+            --la funcio computar iterara amb la primera component fixada
+            computar (Tauler x) i = [z4 | l2 <- [0..(length(x)-1)], l3 <- [0..(length(x)-1)],
+                                    let z3 = posarfitxajugador (posarfitxajugador (Tauler x) Ordinador i) Participant l2,
+                                    let z4 = posarfitxajugador (posarfitxajugador z3 (Ordinador) (greedy z3)) Participant l3]
 
 
 --It is not exactly the transpose I am looking for tbh, but the name works
@@ -578,7 +583,7 @@ jugar :: Tauler -> Int -> IO ()
 jugar (Tauler t1) level
     | level == 1 =
         do
-            print $ evaluarmatriu (t1) Participant 0 0
+            --print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
                 putStrLn("You won!")
                 escriutauler (transpose t1)
@@ -596,7 +601,7 @@ jugar (Tauler t1) level
                     jugar (posarfitxajugador taulernou Ordinador numero) level
     | level == 2 =
         do
-            print $ evaluarmatriu (t1) Participant 0 0
+            --print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
                 putStrLn("You won!")
                 escriutauler (transpose t1)
@@ -613,8 +618,8 @@ jugar (Tauler t1) level
                     jugar (posarfitxajugador taulernou Ordinador (greedy taulernou)) level
     | level == 3 =
         do
-            print (evaluarTaulerprova (Tauler t1) Participant)
-            print $ evaluarmatriu (t1) Participant 0 0
+            --print (evaluarTaulerprova (Tauler t1) Participant)
+            --print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
                 putStrLn("You won!")
                 escriutauler (transpose t1)
@@ -629,7 +634,7 @@ jugar (Tauler t1) level
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
                     let provarr = (extreutauler taulernou)
-                    escriutauler $ transpose $ provarr
+                    --escriutauler $ transpose $ provarr
                     --print (minmaxarray taulernou)
                     jugar (posarfitxajugador taulernou Ordinador (minmax taulernou)) level
 
