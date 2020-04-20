@@ -2,10 +2,7 @@ import Control.Monad
 import System.Random
 
 data Jugador = Ordinador | Participant
-
-data Tauler_Invertit = Tauler_Invertit [[Int]]
-    deriving (Show)
---I dont have the idea of printing it using show, instead we will print it looping through its rows
+--Estructura de dades que nomes pot tenir dos valors
 
 data Tauler = Tauler [[Int]]
     deriving (Show)
@@ -38,7 +35,8 @@ substituir (xs:x) columna numero = [xs] ++ substituir x columna (numero - 1)
 
 
 notFullrow :: Tauler -> Int -> Bool
---Funcio que ens indica si donat un tauler i el numero d'una columna, aquesta esta plena de "fitxes" o encara no
+--Funcio que ens indica si donat un tauler i el numero d'una columna, aquesta esta plena de "fitxes"
+--o encara hi queden llocs
 notFullrow (Tauler t1) row = 
     if (t1!!row!!((length (t1!!row))-1) /= 0) then
         False
@@ -116,6 +114,8 @@ evaluarverticalamunt a valor Participant i j =
             0
 
 evaluarverticalavall :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+--Funcio que donat el Tauler, un Jugador i una posicio (dos enters), ens diu quantes fitxes del jugador hi ha 
+--"en ratlla" mirant cap avall. La necessitat de la variable Bool l'explicare en detall en el read.me
 evaluarverticalavall a valor Ordinador i j =
     if (valor) then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -168,6 +168,8 @@ evaluarverticalavall a valor Participant i j =
             0
 
 evaluar45dreta :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+--Funcio que donat el Tauler, un Jugador i una posicio (dos enters), ens diu quantes fitxes del jugador hi ha 
+--"en ratlla" mirant 45 graus a la dreta. La necessitat de la variable Bool l'explicare en detall en el read.me
 evaluar45dreta a valor Ordinador i j =
     if (valor) then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -216,6 +218,7 @@ evaluar45dreta a valor Participant i j =
             0
 
 evaluar45esquerra :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+--Funcio que evalua la linia de 45 graus cap a l'esquerra, per mirar quantes fitxes consequtives
 evaluar45esquerra a valor Ordinador i j =
     if (valor) then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -262,7 +265,10 @@ evaluar45esquerra a valor Participant i j =
                     0
     else
         0
+
 evaluahortizontaldreta :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+--Funcio que donat el Tauler, un Jugador i una posicio (dos enters), ens diu quantes fitxes del jugador hi ha 
+--"en ratlla" horitzontal a la dreta. La necessitat de la variable Bool l'explicare en detall en el read.me
 evaluahortizontaldreta a valor Ordinador i j =
     if valor then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -309,7 +315,10 @@ evaluahortizontaldreta a valor Participant i j =
                     0
         else
             0
+
 evaluahortizontalesquerra :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+--Funcio que donat el Tauler, un Jugador i una posicio (dos enters), ens diu quantes fitxes del jugador hi ha 
+--"en ratlla" horitzontal a l'esquerra. La necessitat de la variable Bool l'explicare en detall en el read.me
 evaluahortizontalesquerra a valor Ordinador i j =
     if valor then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -358,6 +367,8 @@ evaluahortizontalesquerra a valor Participant i j =
             0
 
 evaluar315dreta :: [[Int]] -> Bool -> Jugador -> Int -> Int -> Int
+--Funcio que evalua la linia de 315 graus cap a la dreta (-45 graus), per mirar quantes fitxes consequtives
+-- hi ha en aquesta direccio
 evaluar315dreta a valor Ordinador i j =
     if valor then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -405,8 +416,9 @@ evaluar315dreta a valor Participant i j =
         else
             0
 
-
 evaluar315esquerra :: [[Int]] -> Bool  -> Jugador -> Int -> Int -> Int
+--Funcio que evalua la linia de 315 graus cap a la dreta (-45 graus), per mirar quantes fitxes consequtives
+--hi ha en aquesta direccio
 evaluar315esquerra a valor Ordinador i j =
     if valor then
         if (i >=0 && j >= 0 && i < length(a) && j < length(a!!0)) then
@@ -454,10 +466,9 @@ evaluar315esquerra a valor Participant i j =
     else
         0
 
-
-
-
 evaluarposicio :: [[Int]] -> Jugador -> Int -> Int -> Int
+--Funcio que donat un tauler, un Jugador i una posicio inicial et retorna el
+--nombre de fitxes consequtives mes llarg que passa per aquest lloc 
 evaluarposicio a Ordinador i j = 
     if (a!!i!!j == 1) then
         if ( 1 + maximum ([evaluarverticalamunt a True Ordinador i (j+1) + evaluarverticalavall a True Ordinador i (j-1)] ++ [evaluar45dreta a True  Ordinador (i+1)(j+1)
@@ -496,7 +507,8 @@ evaluarposicio a Participant i j =
         0
 
 evaluarmatriu :: [[Int]] -> Jugador -> Int -> Int -> [Int]
-        --sha dinterar per les i,j --> retorna la llista i daquesta llista nhauriem dextreure el maxim a dalt
+--Fa el mateix que evaluarposicio pero et retorna la llista amb totes 
+--les posicions evaluades
 evaluarmatriu a j1 i j = 
     if (i == length(a)) then
         []
@@ -507,16 +519,19 @@ evaluarmatriu a j1 i j =
             [evaluarposicio a j1 i j] ++ evaluarmatriu a j1 i (j+1)
 
 evaluarTaulerprova :: Tauler -> Jugador -> [Int]
+--Funcio que donat un tauler i un jugador, retorna la matriu de evaluarposicions
 evaluarTaulerprova (Tauler a) j1  =  evaluarmatriu a j1 0 0
 
 
 evaluarTauler :: Tauler -> Jugador -> Int
---ens ha de retornar per cada tauler quantes consequtives del jugador Ordinador hi ha
---Ordinador te la fitxa==1. he de mirar per cada 1 la seva esquerra, dreta,dalt,baix,diagonals, ho podem fer accedint i mirant si hi ha un 1
+--Funcio que donat un tauler i un Jugador, ens retorna quin es el nombre
+--maxim de fitxes que te consequtives en algun lloc del tauler
 evaluarTauler (Tauler a) j1  = maximum $ evaluarmatriu a j1 0 0
 --Ens quedem amb el maxim possible donat un tauler i un jugador donat
 
 greedy_1 :: Tauler -> Jugador -> Int -> [Int]
+--Donat un Tauler, un Jugador i una posicio inicial, ens retorna el resultat
+--d'evaluar el nou Tauler que quedaria si posesim una fitxa a la posicio donada
 greedy_1 (Tauler a) j1 i = 
     if (i == length(a)) then
         []
@@ -525,43 +540,63 @@ greedy_1 (Tauler a) j1 i =
             [evaluarTauler (posarfitxajugador (Tauler a) j1 i) j1] ++ (greedy_1 (Tauler a) j1 (i+1))
         else
             [-10000] ++ (greedy_1 (Tauler a) j1 (i+1))
---Maybe greedy is the one that compares directly without having to receive the argument Jugador     
---First we'll see if there's an option for the contester to score 4 next round.
---If there's an option for the Participant to score 4 next round, we should aim for that row
+
 greedy :: Tauler -> Int
+--greedy es una Funcio que el que fa es retornar donat un Tauler, on l'Ordinador hauria
+--de posar la seguent fitxa seguint la seguent estrategia
+
+--En cas que el Participant pugui guanyar a la seguent ronda, coloquem la fitxa intentant evitarho
+--En cas que el Participant no pugui guanyar a la seguent ronda, coloquem la fitxa maximitzant el nombre
+--de fitxes consequtives que podem tenir
+
+--La tornare a explicar amb detall en el read.me
 greedy (Tauler x) = 
     if (fst(maximum([q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)])) >= 4) then
         snd(maximum([q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]))
+--L'expressio de dalt no es res fer que fer una argmax, per trobar a quina columna hem de posar la fitxa
     else
         snd(maximum([q | y <- [0..(length(x)-1)], let q = ((greedy_1 (Tauler x) Ordinador 0)!!y,y)]))
---no es res fer que fer una argmax
 
---minmaxarray :: Tauler -> [(Int,Int)]
---minmaxarray (Tauler x) = [(evaluarTauler z3,z) | z <- [0..(length(x)-1)]]
 
 mapcalcularmaxim :: [Tauler] -> [Int]
+--Funcio que donada una llista de Taulers, els evalua tots i retorna el resultat com una llista [Int]
 mapcalcularmaxim [] = []
 mapcalcularmaxim (xs:x) = [evaluarTauler xs Participant] ++ mapcalcularmaxim x
 
 minmax :: Tauler -> Int
+--Funcio que fa servir un minmax per l'estrategia Smart. L'explicare amb detall al read.me
 minmax (Tauler x) = 
     if (fst(maximum[q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]) == 4) then
+        --L'oponent te l'oportunitat de guanyar-nos en el seguent moviment
         snd(maximum([q | y <- [0..(length(x) -1)], let q = ((greedy_1 (Tauler x) Participant 0)!!y,y)]))
+        --Fem un argmax per intentar que l'oponent no en pugui fer 4
     else
-        snd(minimum[(maximum(mapcalcularmaxim (computar (Tauler x) l1)),l1) | l1 <- [0..(length(x)-1)]]) 
+        snd(minimum[(maximum(mapcalcularmaxim (computar (Tauler x) l1)),l1) | l1 <- [0..(length(x)-1)]])
+        --Fem un min-max, agafant el maxim com el resultat que el Participant pot aconseguir
+        --en 2 turnos, tenint en compte que l'Ordinador jugara seguint un greedy
         where
             computar :: Tauler -> Int -> [Tauler]
-            --la funcio computar iterara amb la primera component fixada
+            --la funcio computar donat un tauler i la posiico inicial on l'ordinador posara
+            --la fitxa, ens retorna tot el conjunt de taulers possibles que s'obtindran si
+            --el participant posa una fitxa, l'ordinador respon actuant greediment i el participant
+            --torna a posar una fitxa
             computar (Tauler x) i = [z4 | l2 <- [0..(length(x)-1)], l3 <- [0..(length(x)-1)],
                                     let z3 = posarfitxajugador (posarfitxajugador (Tauler x) Ordinador i) Participant l2,
                                     let z4 = posarfitxajugador (posarfitxajugador z3 (Ordinador) (greedy z3)) Participant l3]
 
 
---It is not exactly the transpose I am looking for tbh, but the name works
 transpose :: [[Int]] -> [[Int]]
+--En primer lloc, no es exactament la transposta d'una matriu.
+
+--Funcio que donat el tauler, ho transforma en un altre tauler perque sigui facil d'escriure
+--Exemple t1 -> [[1,1,0],[0,0,0],[1,0,0]]  ----> [[0,0,0],[1,0,0],[1,0,1]]. D'aquesta manera, quan
+--fem print, escriurem les files de dalt del tauler, ...despres les del mig i finalment les 
+--del principi  
 transpose ([]:_) = []
 transpose  x = (map last x) : transpose (map init x)
 
+--caracters es una funcio que simplement canvia el tauler, per tal de fer-lo d'una
+--forma mes agradable a la vista
 caracters = \x -> 
     if (x == 1) then 'X'
     else
@@ -570,6 +605,7 @@ caracters = \x ->
             '-'
 
 escriutauler :: [[Int]] -> IO()
+--escriu un tauler, en linies diferents
 escriutauler [] = do 
     putStrLn("")
 escriutauler (xs:x) = do 
@@ -577,19 +613,23 @@ escriutauler (xs:x) = do
     escriutauler x
 
 extreutauler :: Tauler -> [[Int]]
+--Donat un Tauler ens retorna la seva matriu
 extreutauler (Tauler t1) = t1
 
 jugar :: Tauler -> Int -> IO ()
+--Jugar es la funcio que accepta un nivell, demana a quina columna vol el Participant
+--posar la seva fitxa, crida a la resposta de l'ordinador i fa print del nou Tauler que queda
 jugar (Tauler t1) level
     | level == 1 =
         do
-            --print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
+                --Mira si el Participant ha guanyat
                 putStrLn("You won!")
                 escriutauler (transpose t1)
 
             else
                 if ((evaluarTauler (Tauler t1) Ordinador) >= 4) then do
+                    --Mira si el l'Ordinador ha guanyat
                     putStrLn("The machine beat you!")
                     escriutauler (transpose t1)
                 else do
@@ -601,7 +641,6 @@ jugar (Tauler t1) level
                     jugar (posarfitxajugador taulernou Ordinador numero) level
     | level == 2 =
         do
-            --print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
                 putStrLn("You won!")
                 escriutauler (transpose t1)
@@ -616,10 +655,10 @@ jugar (Tauler t1) level
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
                     jugar (posarfitxajugador taulernou Ordinador (greedy taulernou)) level
+                    --Veiem com l'Ordinador per decidir el seu nou moviment, computa un greedy
+                    --sobre el tauler resultant
     | level == 3 =
         do
-            --print (evaluarTaulerprova (Tauler t1) Participant)
-            --print $ evaluarmatriu (t1) Participant 0 0
             if ((evaluarTauler (Tauler t1) Participant) >= 4) then do
                 putStrLn("You won!")
                 escriutauler (transpose t1)
@@ -633,10 +672,8 @@ jugar (Tauler t1) level
                     putStrLn("Introdueix la columna on voldries posar la fitxa, tu ets '0'")
                     num <- getLine
                     let taulernou = (posarfitxajugador (Tauler t1) Participant (fromEnum (num!!0)-48))
-                    let provarr = (extreutauler taulernou)
-                    --escriutauler $ transpose $ provarr
-                    --print (minmaxarray taulernou)
                     jugar (posarfitxajugador taulernou Ordinador (minmax taulernou)) level
+                    --L'ordinador fa servir la funcio minmax per decidir on posar la nova fitxa
 
     |otherwise = putStrLn("Undefined Level!")
 
